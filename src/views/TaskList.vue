@@ -4,6 +4,18 @@
     Tasks
   </div>
    <TaskCard v-for="task in tasks" :key="task.id" :task="task"/>
+   <div class="pagination">
+   <router-link id="prev"
+      :to="{ name: 'TaskList', query: { page: page - 1}}"
+      v-if="page != 1"> Prev Page
+    </router-link>
+
+    <router-link id="next"
+      :to="{ name: 'TaskList', query: { page: page + 1}}"
+      v-if="hasNextPage"> Next Page
+    </router-link>
+    </div>
+
 </div>
 </template>
 
@@ -14,14 +26,17 @@ import TaskCard from '@/components/TaskCard.vue'
 // import axios from 'axios'
 
 import TasksService from '@/services/TasksService.js'
+import { watchEffect } from 'vue'
 
 export default {
   name: 'Task List',
+  props: ['page'],
   components: {
     TaskCard
   },
   data () {
     return {
+      totalTasks: 0,
       tasks: null /* [
         {
           id: 1,
@@ -51,14 +66,25 @@ export default {
     }
   },
   created () {
+    watchEffect(() => {
     // axios.get('https://my-json-server.typicode.com/benjaminmalta/MyJSONServerCSS/tasks')
-    TasksService.getTasks()
-      .then(response => {
-        this.tasks = response.data
-      })
-      .catch(error => {
-        console.log('ERRORS' + error)
-      })
+    // TasksService.getTasks()
+      console.log('Page is ' + this.page)
+      TasksService.getTasks(2, this.page)
+        .then(response => {
+          this.tasks = response.data
+          this.totalTasks = response.headers['x-total-count']
+        })
+        .catch(error => {
+          console.log('ERRORS' + error)
+        })
+    })
+  },
+  computed: {
+    hasNextPage () {
+      var totalPages = Math.ceil(this.totalTasks / 2)
+      return this.page < totalPages
+    }
   }
 }
 </script>
@@ -68,4 +94,22 @@ export default {
 
   border-color: red;
 }
+
+.pagination{
+  display: flex;
+  width: 382px;
+}
+.pagination a{
+  flex: 1;
+  text-decoration: none;
+  color: black;
+}
+
+#prev{
+  text-align: left;
+}
+#next{
+  text-align: right;
+}
+
 </style>

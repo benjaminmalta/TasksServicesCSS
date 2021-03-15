@@ -6,7 +6,8 @@ const routes = [
   {
     path: '/',
     name: 'TaskList',
-    component: TaskList
+    component: TaskList,
+    props: route => ({ page: parseInt(route.query.page) || 1 })
   },
   {
     path: '/about',
